@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Document</title>
+<link href="./animate.css">
+<style>
+html,
+body {
+height: 100%;
+margin: 0;
+padding: 0;
+}
+
+div {
+font-size: 30px;
+text-align: center;
+}
+
+body {
+overflow: hidden;
+}
+
+.fir {
+background-color: aliceblue;
+transition: all 2s;
+}
+
+.sec {
+background-color: antiquewhite;
+transition: all 2s;
+}
+
+.thr {
+background-color: aqua;
+transition: all 2s;
+}
+
+.fou {
+background-color: aquamarine;
+transition: all 2s;
+}
+
+.fiv {
+background-color: bisque;
+transition: all 2s;
+}
+
+.page .active{
+color:green;
+background-color: blueviolet;
+}
+
+.active .sec {
+background-color: red;
+}
+</style>
+</head>
+
+<body>
+<div id='wrap'>
+<div class="page fir">
+<div class="animated">page one</div>
+</div>
+<div class="page sec">
+<div>page two</div>
+</div>
+<div class="page thr">
+<div>page three</div>
+</div>
+<div class="page fou">
+<div>page four</div>
+</div>
+<div class="page fiv">
+<div>page five</div>
+</div>
+
+
+</div>
+
+<script>
+window.onload = function () {
+var wrap = document.getElementById('wrap');
+var page = document.getElementsByClassName('page');
+var pagelength = page.length;
+var index = 0;
+// wrap.style.height=window.innerHeight*pagelength+'px';
+for (var i = 0; i < pagelength; i++) {
+page[i].style.height = window.innerHeight + 'px';
+page[i].setAttribute('id', i)
+}
+document.body.scrollTop = 0;
+document.addEventListener('mousewheel', wheel)
+var istrue = true;
+
+function wheel(e) {
+if (istrue) {
+istrue = false;
+if (e.wheelDelta > 0) {
+console.log(e.wheelDelta)
+
+var pageh = document.body.scrollTop - window.innerHeight;
+pageh = pageh < 0 ? 0 : pageh;
+
+index = pageh / window.innerHeight;
+
+//
+for (var i = 0; i < pagelength; i++) {
+page[i].classList.remove('active')
+}
+page[index].classList.add('active')
+
+animation(document.body, {
+'scrollTop': pageh
+}, function () {
+istrue = true;
+})
+
+} else {
+console.log(e.wheelDelta)
+
+var pageh = document.body.scrollTop + window.innerHeight;
+var maxh = wrap.offsetHeight - window.innerHeight;
+pageh = pageh > maxh ? maxh : pageh;
+
+index = pageh / window.innerHeight;
+for (var i = 0; i < pagelength; i++) {
+page[i].classList.remove('active')
+}
+page[index].classList.add('active')
+animation(document.body, {
+'scrollTop': pageh
+}, function () {
+istrue = true;
+})
+
+}
+}
+}
+
+function animation(obj, json, fn) {
+clearInterval(obj.timer);
+//表示运动是否都已经停止
+var flag = true;
+obj.timer = setInterval(function () {
+//循环json
+for (var i in json) {
+if (i == 'opacity') {
+//获取透明度值，round四舍五入去除小数点
+var icur = Math.round(parseFloat(getStyle(obj, i)) * 100);
+} else {
+//获取属性值
+var icur = parseInt(getStyle(obj, i)) || obj[i];
+}
+//缓冲运动，speed随时变换
+var speed = (json[i] - icur) / 10; //千万要写在定时器里面，写在外面会有意想不到的后果
+speed = speed > 0 ? Math.ceil(speed) : Math.floor(speed); //速度向上或者下取整，防止到不了over位置
+//如果有一个没到达终点就是false
+if (json[i] !== icur) {
+flag = false;
+} else {
+flag = true;
+}
+if (i == 'opacity') {
+obj.style.filter = 'alpha(opacity:' + (icur + speed) + ')'; //IE兼容
+obj.style.opacity = (icur + speed) / 100;
+} else if (obj[i] || obj[i] == 0) {
+obj[i] = icur + speed;
+} else {
+obj.style[i] = icur + speed + 'px';
+}
+// console.log(icur + ' ' + json[i]);
+}
+//检查是否所有的运动都已经停止
+if (flag) {
+clearInterval(obj.timer);
+if (fn) {
+fn();
+}
+}
+}, 13);
+}
+/**
+*函数作用：返回样式属性值
+*接受参数：obj（需要获取属性的DOM元素）
+* attr（需要获取的属性名称）
+*/
+function getStyle(obj, attr) {
+if (obj.currentStyle) {
+return obj.currentStyle[attr]; //IE兼容
+} else {
+return getComputedStyle(obj, false)[attr];
+}
+}
+}
+</script>
+</body>
+
+</html>
